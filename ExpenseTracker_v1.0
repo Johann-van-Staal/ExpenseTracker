@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Expenses">
+    <title>Expense Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+        }
+
+        .expenses-list {
+            margin-top: 40px;
+        }
+
+        .expense-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .expense-amount {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .expense-date {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .expense-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #333;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .expense-description {
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .summary {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .summary-label {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .total-value {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .storage-info {
+            margin-top: 20px;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .delete-btn {
+            background: #ff3b30;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Expenses</h1>
+
+        <div class="summary" id="summary" style="display: none;">
+            <div class="summary-row">
+                <span class="summary-label">TODAY</span>
+                <span class="summary-value" id="todayTotal">€0.00</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">THIS MONTH</span>
+                <span class="summary-value total-value" id="monthTotal">€0.00</span>
+            </div>
+        </div>
+
+        <form id="expenseForm">
+            <div class="input-group">
+                <label for="amount">Amount (€)</label>
+                <input type="number" id="amount" step="0.01" required placeholder="0.00">
+            </div>
+
+            <div class="input-group">
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="">Select category</option>
+                    <option value="Food & Drinks">Food & Drinks</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Health & Wellness">Health & Wellness</option>
+                    <option value="Hobbies">Hobbies</option>
+                    <option value="Travel & Accommodation">Travel & Accommodation</option>
+                    <option value="Gifts">Gifts</option>
+                    <option value="Personal Care">Personal Care</option>
+                    <option value="Kids">Kids</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="location">Location (optional)</label>
+                <input type="text" id="location" placeholder="Where was this expense?">
+            </div>
+
+            <div class="input-group">
+                <label for="description">Description (optional)</label>
+                <textarea id="description" placeholder="What was this expense for?"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <button type="submit" class="btn">Add Expense</button>
+        </form>
+
+        <div class="storage-info">
+            <div id="storageStatus">Data stored locally on device</div>
+            <button type="button" class="btn btn-secondary" onclick="exportData()" style="margin-top: 12px;">
+                Export to iCloud
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="importData()">
+                Import from iCloud
+            </button>
+        </div>
+
+        <div class="expenses-list">
+            <h2 style="font-size: 20px; margin-bottom: 20px;">Recent Expenses</h2>
+            <div id="expensesList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Load expenses from localStorage
+        let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+
+        // Add expense
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const expense = {
+                id: Date.now(),
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value,
+                date: document.getElementById('date').value,
+                timestamp: new Date().toISOString()
+            };
+
+            expenses.unshift(expense);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            
+            // Reset form
+            document.getElementById('expenseForm').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            
+            renderExpenses();
+            updateSummary();
+        });
+
+        // Render expenses
+        function renderExpenses() {
+            const list = document.getElementById('expensesList');
+            
+            if (expenses.length === 0) {
+                list.innerHTML = '<div class="empty-state">No expenses recorded yet</div>';
+                return;
+            }
+
+            list.innerHTML = expenses.map(expense => `
+                <div class="expense-item">
+                    <div class="expense-header">
+                        <div class="expense-amount">€${expense.amount.toFixed(2)}</div>
+                        <div class="expense-date">${formatDate(expense.date)}</div>
+                    </div>
+                    <div class="expense-category">${expense.category}</div>
+                    ${expense.location ? `<div class="expense-description">${expense.location}</div>` : ''}
+                    ${expense.description ? `<div class="expense-description">${expense.description}</div>` : ''}
+                    <button class="delete-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // Delete expense
+        function deleteExpense(id) {
+            if (confirm('Delete this expense?')) {
+                expenses = expenses.filter(e => e.id !== id);
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                renderExpenses();
+                updateSummary();
+            }
+        }
+
+        // Update summary
+        function updateSummary() {
+            const today = new Date().toISOString().split('T')[0];
+            const thisMonth = new Date().toISOString().slice(0, 7);
+
+            const todayExpenses = expenses.filter(e => e.date === today);
+            const monthExpenses = expenses.filter(e => e.date.startsWith(thisMonth));
+
+            const todayTotal = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const monthTotal = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+            document.getElementById('todayTotal').textContent = `€${todayTotal.toFixed(2)}`;
+            document.getElementById('monthTotal').textContent = `€${monthTotal.toFixed(2)}`;
+            
+            document.getElementById('summary').style.display = expenses.length > 0 ? 'block' : 'none';
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            const dateOnly = date.toISOString().split('T')[0];
+            const todayOnly = today.toISOString().split('T')[0];
+            const yesterdayOnly = yesterday.toISOString().split('T')[0];
+
+            if (dateOnly === todayOnly) return 'Today';
+            if (dateOnly === yesterdayOnly) return 'Yesterday';
+            
+            return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        // Export to JSON file (can be saved to iCloud)
+        function exportData() {
+            const dataStr = JSON.stringify(expenses, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `expenses_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Import from JSON file
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    try {
+                        const importedExpenses = JSON.parse(event.target.result);
+                        
+                        // Merge with existing expenses, avoiding duplicates
+                        const existingIds = new Set(expenses.map(e => e.id));
+                        const newExpenses = importedExpenses.filter(e => !existingIds.has(e.id));
+                        
+                        expenses = [...expenses, ...newExpenses].sort((a, b) => 
+                            new Date(b.timestamp) - new Date(a.timestamp)
+                        );
+                        
+                        localStorage.setItem('expenses', JSON.stringify(expenses));
+                        renderExpenses();
+                        updateSummary();
+                        
+                        alert(`Imported ${newExpenses.length} new expenses`);
+                    } catch (error) {
+                        alert('Error importing file. Please check the file format.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Initial render
+        renderExpenses();
+        updateSummary();
+    </script>
+</body>
+</html>
